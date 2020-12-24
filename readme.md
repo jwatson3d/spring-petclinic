@@ -1,5 +1,13 @@
 # Spring PetClinic Sample Application [![Build Status](https://travis-ci.org/spring-projects/spring-petclinic.png?branch=main)](https://travis-ci.org/spring-projects/spring-petclinic/)
 
+## UPDATES:
+|Date | Notes  |
+|-----|-----|
+| 2020/12/23 | Add logging |
+| | Compile: `./mvnw -DskipTests -Dcheckstyle.skip clean compile` |
+| | Package: `./mvnw -DskipTests -Dcheckstyle.skip clean package` |
+| | Run: `./mvnw -Dcheckstyle.skip spring-boot:run` |
+
 ## Understanding the Spring Petclinic application with a few diagrams
 <a href="https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application">See the presentation here</a>
 

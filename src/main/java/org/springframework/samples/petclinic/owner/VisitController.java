@@ -19,6 +19,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
@@ -44,6 +46,8 @@ class VisitController {
 
 	private final PetRepository pets;
 
+	static final Logger logger = LoggerFactory.getLogger(VisitController.class);
+
 	public VisitController(VisitRepository visits, PetRepository pets) {
 		this.visits = visits;
 		this.pets = pets;
@@ -63,11 +67,14 @@ class VisitController {
 	 */
 	@ModelAttribute("visit")
 	public Visit loadPetWithVisit(@PathVariable("petId") int petId, Map<String, Object> model) {
+		logger.trace("Enter loadPetWithVisit");
 		Pet pet = this.pets.findById(petId);
 		pet.setVisitsInternal(this.visits.findByPetId(petId));
 		model.put("pet", pet);
 		Visit visit = new Visit();
 		pet.addVisit(visit);
+		logger.debug("pet {} loaded", pet);
+		logger.trace("Enter loadPetWithVisit");
 		return visit;
 	}
 
@@ -80,11 +87,14 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before processNewVisitForm is called
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
 	public String processNewVisitForm(@Valid Visit visit, BindingResult result) {
+		logger.trace("Enter processNewVisitForm");
 		if (result.hasErrors()) {
+			logger.debug("error adding new visit {}", visit);
 			return "pets/createOrUpdateVisitForm";
 		}
 		else {
 			this.visits.save(visit);
+			logger.debug("saved new visit {}", visit);
 			return "redirect:/owners/{ownerId}";
 		}
 	}
