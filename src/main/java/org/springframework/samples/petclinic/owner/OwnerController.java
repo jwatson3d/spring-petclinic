@@ -15,6 +15,8 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,6 +45,8 @@ class OwnerController {
 
 	private final OwnerRepository owners;
 
+	static final Logger logger = LoggerFactory.getLogger(OwnerController.class);
+
 	private VisitRepository visits;
 
 	public OwnerController(OwnerRepository clinicService, VisitRepository visits) {
@@ -52,13 +56,17 @@ class OwnerController {
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
+		logger.trace("Enter generate");
 		dataBinder.setDisallowedFields("id");
 	}
 
 	@GetMapping("/owners/new")
 	public String initCreationForm(Map<String, Object> model) {
+		logger.trace("Enter initCreationForm");
 		Owner owner = new Owner();
 		model.put("owner", owner);
+		logger.debug("owner {} {} [id={}] created", owner.getFirstName(), owner.getLastName(), owner.getId());
+		logger.trace("Exit initCreationForm");
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
@@ -69,18 +77,23 @@ class OwnerController {
 		}
 		else {
 			this.owners.save(owner);
+			logger.debug("owner {} {} [id={}] saved", owner.getFirstName(), owner.getLastName(), owner.getId());
+			logger.trace("Exit processCreationForm");
 			return "redirect:/owners/" + owner.getId();
 		}
 	}
 
 	@GetMapping("/owners/find")
 	public String initFindForm(Map<String, Object> model) {
+		logger.trace("Enter initFindForm");
 		model.put("owner", new Owner());
+		logger.trace("Exit initFindForm");
 		return "owners/findOwners";
 	}
 
 	@GetMapping("/owners")
 	public String processFindForm(Owner owner, BindingResult result, Map<String, Object> model) {
+		logger.trace("Enter processFindForm");
 
 		// allow parameterless GET request for /owners to return all records
 		if (owner.getLastName() == null) {
@@ -88,20 +101,26 @@ class OwnerController {
 		}
 
 		// find owners by last name
+		logger.debug("owners.findByLastName({})", owner.getLastName());
 		Collection<Owner> results = this.owners.findByLastName(owner.getLastName());
 		if (results.isEmpty()) {
 			// no owners found
 			result.rejectValue("lastName", "notFound", "not found");
+			logger.trace("Exit processFindForm with results.isEmpty()");
 			return "owners/findOwners";
 		}
 		else if (results.size() == 1) {
 			// 1 owner found
 			owner = results.iterator().next();
+			logger.debug("owner {} {} [id={}] found", owner.getFirstName(), owner.getLastName(), owner.getId());
+			logger.trace("Exit processFindForm with results.size() == 1");
 			return "redirect:/owners/" + owner.getId();
 		}
 		else {
 			// multiple owners found
 			model.put("selections", results);
+			logger.debug("{} owners found", results.size());
+			logger.trace("Exit processFindForm with multiple owners found");
 			return "owners/ownersList";
 		}
 	}

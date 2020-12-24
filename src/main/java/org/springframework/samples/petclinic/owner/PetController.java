@@ -15,6 +15,8 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -40,6 +42,8 @@ class PetController {
 
 	private final OwnerRepository owners;
 
+	static final Logger logger = LoggerFactory.getLogger(PetController.class);
+
 	public PetController(PetRepository pets, OwnerRepository owners) {
 		this.pets = pets;
 		this.owners = owners;
@@ -47,6 +51,7 @@ class PetController {
 
 	@ModelAttribute("types")
 	public Collection<PetType> populatePetTypes() {
+		logger.trace("Enter populatePetTypes");
 		return this.pets.findPetTypes();
 	}
 
@@ -67,24 +72,32 @@ class PetController {
 
 	@GetMapping("/pets/new")
 	public String initCreationForm(Owner owner, ModelMap model) {
+		logger.trace("Enter initCreationForm");
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		model.put("pet", pet);
+		logger.trace("Exit initCreationForm");
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/pets/new")
 	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result, ModelMap model) {
+		logger.trace("Enter processCreationForm");
 		if (StringUtils.hasLength(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null) {
+			logger.debug("pet {} already exists", pet.getName());
 			result.rejectValue("name", "duplicate", "already exists");
 		}
 		owner.addPet(pet);
 		if (result.hasErrors()) {
 			model.put("pet", pet);
+			logger.debug("error adding new pet {}", pet);
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
 		else {
 			this.pets.save(pet);
+			logger.debug("pet {} [id={}] saved for owner {} {}", pet.getName(), pet.getId(), owner.getFirstName(),
+					owner.getLastName());
+			logger.debug("saved new pet {}", pet);
 			return "redirect:/owners/{ownerId}";
 		}
 	}
