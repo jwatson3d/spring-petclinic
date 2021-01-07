@@ -7,6 +7,7 @@
 | | Compile: `./mvnw -DskipTests -Dcheckstyle.skip clean compile` |
 | | Package: `./mvnw -DskipTests -Dcheckstyle.skip clean package` |
 | | Run: `./mvnw -Dcheckstyle.skip spring-boot:run` |
+| | Run: `java -jar target/spring-petclinic-2.4.0.BUILD-SNAPSHOT.jar --server.port=8082  --logging.level.org.springframework.samples=DEBUG` |
 
 ## Understanding the Spring Petclinic application with a few diagrams
 <a href="https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application">See the presentation here</a>
